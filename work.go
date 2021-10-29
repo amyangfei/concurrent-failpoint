@@ -32,5 +32,5 @@ func work() {
 		failpoint.Return()
 	})
 	failpoint.Inject("path3."+caller2(), nil)
-	fmt.Println("normal worker path")
+	fmt.Println("work path normal")
 }

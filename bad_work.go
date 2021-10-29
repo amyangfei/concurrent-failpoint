@@ -15,5 +15,5 @@ func badWork() {
 		fmt.Println("bad work path2")
 		failpoint.Return()
 	})
-	fmt.Println("normal bad worker path")
+	fmt.Println("bad work path normal")
 }
