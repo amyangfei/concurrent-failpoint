@@ -47,7 +47,9 @@ ok      cf      0.023s
 
 ## A workaround for parallel failpoint injection
 
-In work.go, the failpoint injection path is encoded with a dynamic function name, which is the entrypoint of test case, where we have enabled a failpoint. This time the failpoint injection will only take effect when the matching test case is running.
+~In work.go, the failpoint injection path is encoded with a dynamic function name, which is the entrypoint of test case, where we have enabled a failpoint. This time the failpoint injection will only take effect when the matching test case is running.~
+
+We can use InjectContext and failpoint.WithHook to pass a test independent context key value to achieve running parallel test cases without injection race.
 
 ```bash
 ➜  failpoint-ctl enable .
@@ -94,15 +96,12 @@ PASS
 ok      cf      0.005s
 ```
 
-The trick code is as follows
+The basic code is as follows
 
 ```go
 // business code with failpoint injection
-func() {
-	// "path1." is a common injection string
-	// caller2() is a dynamic function name, which is often the function name
-	// of test case.
-	failpoint.Inject("path1."+caller2(), func() {
+func work(ctx context.Context) {
+	failpoint.InjectContext(ctx, "path1", func() {
 		// do something
 	})
 	// ...
@@ -110,9 +109,12 @@ func() {
 
 // test case entrypoint, with failpoint enable
 func TestWorkPath1(t *testing.T) {
-	// This is still a normal failpoint enable statement, while the last part
-	// contains the function name of this test case.
-	failpoint.Enable("cf/path1.cf.TestWorkPath1", "return(true)")
-	// ...
+	failpoint.Enable("cf/path1", "return(true)")
+	ctx := failpoint.WithHook(context.Background(), func(ctx context.Context, fpname string) bool {
+		// only the code is running from this test case contains the context key of `fpname`
+		return ctx.Value(fpname) != nil
+	})
+	ctx = context.WithValue(ctx, "cf/path1", struct{}{})
+	work(ctx)
 }
 ```
