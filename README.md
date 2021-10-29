@@ -52,34 +52,44 @@ In work.go, the failpoint injection path is encoded with a dynamic function name
 ```bash
 ➜  failpoint-ctl enable .
 ➜  go test -count=2 -v -run TestWork
+=== RUN   TestWorkNormal
+=== PAUSE TestWorkNormal
 === RUN   TestWorkPath1
 === PAUSE TestWorkPath1
 === RUN   TestWorkPath2
 === PAUSE TestWorkPath2
 === RUN   TestWorkPathPanic
 === PAUSE TestWorkPathPanic
-=== CONT  TestWorkPath1
-work path1
---- PASS: TestWorkPath1 (0.00s)
+=== CONT  TestWorkNormal
+work path normal
+--- PASS: TestWorkNormal (0.00s)
 === CONT  TestWorkPathPanic
 --- PASS: TestWorkPathPanic (0.00s)
 === CONT  TestWorkPath2
 work path2
 --- PASS: TestWorkPath2 (0.00s)
+=== CONT  TestWorkPath1
+work path1
+--- PASS: TestWorkPath1 (0.00s)
+=== RUN   TestWorkNormal
+=== PAUSE TestWorkNormal
 === RUN   TestWorkPath1
 === PAUSE TestWorkPath1
 === RUN   TestWorkPath2
 === PAUSE TestWorkPath2
 === RUN   TestWorkPathPanic
 === PAUSE TestWorkPathPanic
-=== CONT  TestWorkPath1
-work path1
---- PASS: TestWorkPath1 (0.00s)
+=== CONT  TestWorkNormal
+work path normal
+--- PASS: TestWorkNormal (0.00s)
 === CONT  TestWorkPathPanic
 --- PASS: TestWorkPathPanic (0.00s)
 === CONT  TestWorkPath2
 work path2
 --- PASS: TestWorkPath2 (0.00s)
+=== CONT  TestWorkPath1
+work path1
+--- PASS: TestWorkPath1 (0.00s)
 PASS
 ok      cf      0.005s
 ```

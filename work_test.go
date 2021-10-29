@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNormalWork(t *testing.T) {
+func TestWorkNormal(t *testing.T) {
 	t.Parallel()
 	work()
 }
