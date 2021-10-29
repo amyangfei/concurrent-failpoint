@@ -47,7 +47,7 @@ ok      cf      0.023s
 
 ## A workaround for parallel failpoint injection
 
-In work.go, the failpoint injection path is encoded with a dynamic function name, which can be used with the real test case function where we enable the failpoint. This time the failpoint injection will only take effect when the test case really needs it.
+In work.go, the failpoint injection path is encoded with a dynamic function name, which is entrypoint of test case, where we have enabled a failpoint. This time the failpoint injection will only take effect when the matching test case is running.
 
 ```bash
 ➜  failpoint-ctl enable .
@@ -82,4 +82,26 @@ work path2
 --- PASS: TestWorkPath2 (0.00s)
 PASS
 ok      cf      0.005s
+```
+
+The trick code is as follows
+
+```go
+// business code with failpoint injection
+func() {
+    // "path1." is a common injection string
+    // caller2() is a dynamic function name, which is often the function name of test case.
+	failpoint.Inject("path1."+caller2(), func() {
+        // do something
+	})
+    // ...
+}
+
+// test case entrypoint, with failpoint enable
+func TestWorkPath1(t *testing.T) {
+    // This is still a normal failpoint enable statement, while the last part
+    // contains the function name of this test case.
+	failpoint.Enable("cf/path1.cf.TestWorkPath1", "return(true)")
+    // ...
+}
 ```
