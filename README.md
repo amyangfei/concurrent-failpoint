@@ -6,7 +6,7 @@ The basic premise is once a failpoint is enabled, its injection terms will take 
 
 Taking bad_work.go and bad_work_test.go as an example:
 
-bad_work.go defines a function `badWork`, which has two failpoint injections. In bad_work_test.go we have three test cases, `TestBadWorkPath1` and `TestBadWorkPath2` enable a failpoint respectively, parallel mode is enabled in each test case. When we enable failpoint and run test cases, we will find the injection race. Pay attention to the output of `bad work path...`, the injection `cf/bad-path1` will be always work after its first injection.
+bad_work.go defines a function `badWork`, which has two failpoint injections. In bad_work_test.go we have three test cases, `TestBadWorkPath1` and `TestBadWorkPath2` enable a failpoint respectively, parallel mode is enabled in each test case. When we enable failpoint and run test cases, we will find the injection race. Pay attention to the output of `bad work path...`, the injection `cf/bad-path1` will always work after its first injection.
 
 ```bash
 ➜  failpoint-ctl enable .
@@ -47,7 +47,7 @@ ok      cf      0.023s
 
 ## A workaround for parallel failpoint injection
 
-In work.go, the failpoint injection path is encoded with a dynamic function name, which is entrypoint of test case, where we have enabled a failpoint. This time the failpoint injection will only take effect when the matching test case is running.
+In work.go, the failpoint injection path is encoded with a dynamic function name, which is the entrypoint of test case, where we have enabled a failpoint. This time the failpoint injection will only take effect when the matching test case is running.
 
 ```bash
 ➜  failpoint-ctl enable .
@@ -90,7 +90,8 @@ The trick code is as follows
 // business code with failpoint injection
 func() {
 	// "path1." is a common injection string
-	// caller2() is a dynamic function name, which is often the function name of test case.
+	// caller2() is a dynamic function name, which is often the function name
+	// of test case.
 	failpoint.Inject("path1."+caller2(), func() {
 		// do something
 	})
