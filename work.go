@@ -1,36 +1,22 @@
 package cf
 
 import (
+	"context"
 	"fmt"
-	"runtime"
 
 	"github.com/pingcap/failpoint"
 )
 
-// Return the first function name after removing `skip` callers.
-func caller(skip int) string {
-	pc := make([]uintptr, 1024)
-	n := runtime.Callers(0, pc)
-	return runtime.FuncForPC(pc[n-skip-1]).Name()
-}
-
-// caller2 alias to caller(2)
-// In most cases skip=2, which are
-//   - testing.(*T).Run
-//   - testing.tRunner()
-func caller2() string {
-	return caller(2)
-}
-
-func work() {
-	failpoint.Inject("path1."+caller2(), func() {
+func work(ctx context.Context) {
+	failpoint.InjectContext(ctx, "path1", func() {
 		fmt.Println("work path1")
 		failpoint.Return()
+
 	})
-	failpoint.Inject("path2."+caller2(), func() {
+	failpoint.InjectContext(ctx, "path2", func() {
 		fmt.Println("work path2")
 		failpoint.Return()
 	})
-	failpoint.Inject("path3."+caller2(), nil)
+	failpoint.InjectContext(ctx, "path3", nil)
 	fmt.Println("work path normal")
 }
